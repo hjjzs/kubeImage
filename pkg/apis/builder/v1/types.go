@@ -12,6 +12,8 @@ type BuilderSpec struct {
 }
 
 type RemoteContext struct {
+
+	// +kubebuilder:validation:MaxLength=200
 	ContentUrl string `json:"contentUrl"`
 	Type       string `json:"type"`
 
