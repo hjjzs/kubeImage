@@ -1,3 +1,3 @@
 package downloader
 
-import _ "test/pkg/downloader/plugins"
+import _ "builder/pkg/downloader/plugins"

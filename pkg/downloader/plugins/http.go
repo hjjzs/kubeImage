@@ -1,10 +1,10 @@
 package plugins
 
 import (
+	"builder/pkg/downloader/downloaderPlugin"
 	"io"
 	"net/http"
 	"os"
-	"test/pkg/downloader/downloaderPlugin"
 )
 
 type HTTPDownloader struct {
