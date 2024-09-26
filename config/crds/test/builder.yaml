@@ -1,0 +1,7 @@
+---
+apiVersion: builder.hjjzs.xyz/v1
+kind: Builder
+metadata:
+  name: example-builder
+spec:
+  buildName: example-build

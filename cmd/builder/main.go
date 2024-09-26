@@ -1,35 +1,49 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	clientset "builder/pkg/client/generated/clientset/versioned"
+	informer "builder/pkg/client/generated/informers/externalversions"
+	"builder/pkg/controller"
+	"builder/pkg/signals"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	"log"
-	clientset "test/pkg/generated/clientset/versioned"
+	"k8s.io/klog/v2"
 )
 
 func main() {
+	klog.InitFlags(nil)
+	ctx := signals.SetupSignalHandler()
+	logger := klog.FromContext(ctx)
+
 	cfg, err := clientcmd.BuildConfigFromFlags("", "/root/.kube/config")
 	if err != nil {
-		log.Fatal(err)
-		panic(err)
+		logger.Error(err, "Error building kubeconfig")
+		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 	}
+
+	// new k8s client from cfg
+	k8sClient, err := kubernetes.NewForConfig(cfg)
+	if err != nil {
+		logger.Error(err, "Error building kubernetes clientset")
+		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
+	}
+
 	client, err := clientset.NewForConfig(cfg)
 	if err != nil {
-		log.Fatal(err)
-		panic(err)
+		logger.Error(err, "Error building kubernetes clientset")
+		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 	}
 
-	//factory := externalversions.NewSharedInformerFactory(client, time.Second*30)
-	//informer := factory.Hjjzs().V1().DockerFiles()
-	list, err := client.HjjzsV1().DockerFiles("default").List(context.Background(), v1.ListOptions{})
-	if err != nil {
-		log.Fatal(err)
-	}
+	factory := informer.NewSharedInformerFactory(client, 0)
 
-	for _, item := range list.Items {
-		fmt.Println(item.Name)
-	}
+	controller := controller.NewController(ctx, k8sClient, client,
+		factory.Image().V1().Images(),
+		factory.Builder().V1().Builders())
 
+	factory.Start(ctx.Done())
+
+	if err = controller.Run(ctx, 2); err != nil {
+		logger.Error(err, "Error running controller")
+		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
+	}
 }

@@ -4,20 +4,20 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: (devel)
-  name: builders.hjjzs.xyz
+  name: images.image.hjjzs.xyz
 spec:
-  group: hjjzs.xyz
+  group: image.hjjzs.xyz
   names:
-    kind: Builder
-    listKind: BuilderList
-    plural: builders
-    singular: builder
+    kind: Image
+    listKind: ImageList
+    plural: images
+    singular: image
   scope: Namespaced
   versions:
   - name: v1
     schema:
       openAPIV3Schema:
-        description: Builder is the Schema for the builders API
+        description: Image is the Schema for the images API
         properties:
           apiVersion:
             description: |-
@@ -37,42 +37,40 @@ spec:
           metadata:
             type: object
           spec:
-            description: BuilderSpec defines the desired state of Builder
+            description: ImageSpec defines the desired state of Image
             properties:
-              dockerFileBase64:
+              imageTag:
                 type: string
-              dockerFileString:
+              imageType:
+                description: INSERT ADDITIONAL SPEC FIELDS -- desired state of cluster
                 type: string
-              remoteContext:
-                properties:
-                  authConfigMap:
-                    maxLength: 20
-                    minLength: 1
-                    type: string
-                  contentUrl:
-                    maxLength: 200
-                    type: string
-                  dockerFileName:
-                    maxLength: 20
-                    minLength: 1
-                    type: string
-                  type:
-                    type: string
-                required:
-                - authConfigMap
-                - contentUrl
-                - dockerFileName
-                - type
-                type: object
+              imageUrl:
+                type: string
+              registerSecret:
+                type: string
             required:
-            - dockerFileBase64
-            - dockerFileString
-            - remoteContext
+            - imageTag
+            - imageType
+            - imageUrl
+            - registerSecret
             type: object
           status:
             description: |-
-              BuilderStatus defines the observed state of Builder.
+              ImageStatus defines the observed state of Image.
               It should always be reconstructable from the state of the cluster and/or outside world.
+            properties:
+              imagePullPath:
+                type: string
+              imageSize:
+                description: INSERT ADDITIONAL STATUS FIELDS -- observed state of
+                  cluster
+                type: string
+              state:
+                type: string
+            required:
+            - imagePullPath
+            - imageSize
+            - state
             type: object
         type: object
     served: true
